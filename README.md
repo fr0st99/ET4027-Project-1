@@ -4,9 +4,9 @@ In order to run the application install a GCC compiler first
 
 Then run the following commands: 
 
-gcc .\Lab1.c -o Lab1 (This compiles the c file into an exe)
+**gcc .\Lab1.c -o Lab1 (This compiles the c file into an exe)**
 
-.\Lab1.exe .\Sample_1.dd 
+**.\Lab1.exe .\Sample_1.dd **
 
 
 Running the last line will display the following information: 
