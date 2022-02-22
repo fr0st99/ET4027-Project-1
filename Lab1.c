@@ -1,8 +1,10 @@
 
-// Author: 
-// Ashutosh Yadav
-// Emma Hurley
-// Conall McAteer
+// Authors: 
+// Ashutosh Yadav 18249094 
+// Emma Hurley 17212723
+// Conall McAteer 18173586
+
+// Initial Program adapted from ADDENDUM 3 in project requirements
 
 
 #include <stdio.h>
