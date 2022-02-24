@@ -1,4 +1,4 @@
-# ET4027-Projet-1
+# ET4027-Project-1
 
 In order to run the application install a GCC compiler first
 
