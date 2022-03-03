@@ -12,8 +12,7 @@
 #include <stdlib.h>
 
 struct Partition{ char type; int start_sect; int size;} part_entry[4]; // 4 x partition table entry
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
 // Define some variables
 int i, offset = 16, not_exist = 0;int *tmp_ptr;
 FILE *fp;
@@ -23,7 +22,8 @@ fp = fopen(argv[1], "rb"); // Open file for reading - binary mode. Should use er
 fseek(fp, 0x1BE, SEEK_SET); // Seek to the start of the part_entry list
 fread(buf_part_table, 1, 64, fp); // Read the 64-byte block to memory buffer
 
-printf("############################## FORENSIC_TOOL_PHASE1 #################################### \n");
+
+printf("############################## FORENSIC_TOOL_PHASE 1 #################################### \n");
 printf("############################## Partitions on %s disk image ############################## \n", argv[1]);
 
 for (i=0; i <4; i++) {
@@ -37,6 +37,10 @@ case 05 : strcpy ( vol_type, "MS-DOS"); break;
 case 06 : strcpy ( vol_type, "FAT-16"); break;
 case 07 : strcpy ( vol_type, "NTFS"); break;
 case 0x0B: strcpy ( vol_type, "FAT-32"); break;
+case 0x0C: strcpy(vol_type, "FAT-32 (LBA)"); break;
+case 0x0E: strcpy(vol_type, "FAT-16 (LBA)"); break;
+
+
 default: strcpy ( vol_type, "NOT-DECODED"); break;
  }
 // Print out partition content
