@@ -49,6 +49,7 @@ part_entry[i].size);
  }
 printf("\n\nThe total number of valid partitions is: %d\n\n", (4 - not_exist));
 printf("################################################################## \n");
+printf("################################################################## \n");
 
 fclose(fp);
  return(0);
