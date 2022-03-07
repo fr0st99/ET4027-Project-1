@@ -33,12 +33,16 @@ part_entry[i].start_sect = *(int*)(buf_part_table + 0x08 +(i * offset));
 part_entry[i].size = *(int*)(buf_part_table + 0x0C + (i * offset)) ;
  switch (part_entry[i].type) {
 case 00 : strcpy ( vol_type, "NOT-VALID"); break;
-case 05 : strcpy ( vol_type, "MS-DOS"); break;
-case 06 : strcpy ( vol_type, "FAT-16"); break;
-case 07 : strcpy ( vol_type, "NTFS"); break;
-case 0x0B: strcpy ( vol_type, "FAT-32"); break;
-case 0x0C: strcpy(vol_type, "FAT-32 (LBA)"); break;
-case 0x0E: strcpy(vol_type, "FAT-16 (LBA)"); break;
+case 0x05 : strcpy ( vol_type, "MS-DOS"); break;
+case 0x06 : strcpy ( vol_type, "FAT-16"); break;
+case 0x07 : strcpy ( vol_type, "NTFS"); break;
+case 0x16 : strcpy ( vol_type, "Hidden Hidden FAT16"); break;
+case 0x17 : strcpy ( vol_type, "Hidden NTFS Partition"); break;
+case 0x0B : strcpy ( vol_type, "FAT-32"); break;
+case 0x0C : strcpy( vol_type, "FAT-32 (LBA)"); break;
+case 0x0E : strcpy( vol_type, "FAT-16 (LBA)"); break;
+case 0x1E  : strcpy( vol_type, "Windows hidden LBA VFAT partition"); break;
+
 
 
 default: strcpy ( vol_type, "NOT-DECODED"); break;
