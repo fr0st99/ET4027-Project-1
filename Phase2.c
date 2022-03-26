@@ -13,7 +13,7 @@
 
 
 struct Partition{ int type; int start_sect; int size;} part_entry[4]; // 4 x partition table entry
-struct FATpart{ int sectPerCluster; int FATarea; int rootDir; int clust2Add; } FATinfo;
+struct fatPartition{ int sect_per_cluster; int fat_area; int root_dir; int clust2Add; } fat_Info;
 
 
 int main(int argc, char *argv[])
@@ -45,29 +45,21 @@ int main(int argc, char *argv[])
             part_entry[i].size = *(int*)(buf_part_table + 0x0C + (i * offset)) ;
             
             switch (part_entry[i].type) {
-                case 0x00 : strcpy ( vol_type, "NOT-VALID"); break;
+
+                case 00 : strcpy ( vol_type, "NOT-VALID"); break;
+                case 0x0B: strcpy ( vol_type,"FAT-32"); break;
+                case 0x0C : strcpy( vol_type, "FAT-32 (LBA)"); break;
+                case 0x0E : strcpy( vol_type, "FAT-16 (LBA)"); break;       
                 case 0x01 : strcpy ( vol_type, "FAT-12"); break;
                 case 0x02 : strcpy ( vol_type, "XENIX root"); break;
                 case 0x05 : strcpy ( vol_type, "MS-DOS"); break;
                 case 0x06 : strcpy ( vol_type, "FAT-16"); break;
                 case 0x07 : strcpy ( vol_type, "NTFS"); break;
-                
-                case 0x0B: strcpy ( vol_type,"FAT-32"); break;
-                case 0x0C: strcpy (vol_type, "FAT-32 (INT 13 extension)"); break;
-                case 0x0E: strcpy (vol_type, "FAT-16 (>= 32MB, INT 13 extension)"); break;
-                case 0x0F: strcpy (vol_type, "E FAT-16"); break; //check this
-                /* Hidden file systems */
-                case 0x14 : strcpy (vol_type, "Hidden FAT-16 (<32mb)"); break;
                 case 0x16 : strcpy ( vol_type, "Hidden FAT16"); break;
                 case 0x17 : strcpy (vol_type, "Hidden NTFS Partition"); break;
-                case 0x1B : strcpy (vol_type, "Hidden FAT-32"); break;
-                case 0x1C : strcpy (vol_type, "Hidden FAT-32 (Ext. INT 13)"); break;
-                case 0x1E : strcpy (vol_type, "Hidden FAT-16 (>32 MB, Ext. INT 13)"); break;
-                //end of the hidden systems
-
+                case 0x1B : strcpy (vol_type, "Hidden FAT-32"); break;                          
                 case 0x42 : strcpy (vol_type, "Secure File System"); break;
                 case 0x82 : strcpy (vol_type, "Linux Swap partition"); break;
-                case 0x83 : strcpy (vol_type, "Linux Native File System (ext2/3/4)"); break;
                 
                 default: strcpy ( vol_type, "NOT-DECODED"); break;
             }
@@ -94,8 +86,8 @@ int main(int argc, char *argv[])
 
       printf("\n");
     //the number of sectors per cluster
-      FATinfo.sectPerCluster = *(char*)(buf_fat_part + 0xd ); // Char can store 512 thats why we use it
-      printf("The sectors per cluster is: %-12d", FATinfo.sectPerCluster);  //Printing the sectors per cluster
+      fat_Info.sect_per_cluster = *(char*)(buf_fat_part + 0xd ); // Char can store 512 thats why we use it
+      printf("The sectors per cluster is: %-12d", fat_Info.sect_per_cluster);  //Printing the sectors per cluster
       
     //the size of the FAT area,
       //Fat area size = (Size of FAT in sectors) * (Number of FAT copies)
@@ -104,8 +96,8 @@ int main(int argc, char *argv[])
       sizeSectB = *(char*)(buf_fat_part + 0x17);
       sizeSectB = (sizeSectB<<8) ;
       sizeSectA = sizeSectA + sizeSectB;      
-      FATinfo.FATarea = sizeSectA * noFatCopies;
-      printf("\nThe fat area is: %-12d", FATinfo.FATarea);  //Printing the Fat area
+      fat_Info.fat_area = sizeSectA * noFatCopies;
+      printf("\nThe fat area is: %-12d", fat_Info.fat_area);  //Printing the Fat area
       
                 //the size of the root direcotry
                     //Root dir size = ((Max no. of directories)*(dir entry size in bytes)/sector size
@@ -125,7 +117,7 @@ int main(int argc, char *argv[])
         sizeReservedArea = sizeReservedArea2 + sizeReservedArea;
         printf("\nThe SIZE OF RESERVED AREA is: %-12d", sizeReservedArea);
         printf("\nThe start sec is: %-12d", part_entry[0].start_sect);
-        rootDirAddr = (part_entry[0].start_sect) + (sizeReservedArea) + FATinfo.FATarea;
+        rootDirAddr = (part_entry[0].start_sect) + (sizeReservedArea) + fat_Info.fat_area;
         sectorAddr = rootDirAddr + rootDirSize;
         printf("\nThe sector address for #2 is: %d", sectorAddr);
 
@@ -164,7 +156,6 @@ int main(int argc, char *argv[])
                 sizeDelFile = sizeDelFile + (sizeDelFileArr[2] << 16);
                 sizeDelFile = sizeDelFile + (sizeDelFileArr[1] << 8);
                 sizeDelFile = sizeDelFile + (sizeDelFileArr[0]);
-                //printf("\n%X%X%X%X", sizeDelFileArr[3],sizeDelFileArr[2],sizeDelFileArr[1],sizeDelFileArr[0]);
                 printf("\nDeleted File Size in bytes: %-12d", sizeDelFile);
                 
                 
