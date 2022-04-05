@@ -338,7 +338,7 @@ int main(int argc, char *argv[]){
             printf("\n");
 
 
-            /* Deleted file details */
+            /* Deleted file details (FAT) */
 
             fileseek_root = fseek(fp, rootDirAddr * 512 , SEEK_SET); //Seek to the start of the part_entry list
             fileread_root = fread(buf_root_part, 1, 512, fp); // Read the 512-byte block to memory buffer
@@ -350,9 +350,14 @@ int main(int argc, char *argv[]){
             char f_ten[11];
             f_ten[0] = fbyte;
 
-            //the name of that file
+            /* Name of deleted file operation */
+
+            /* https://www.ntfs.com/disk-scan.htm#:~:text=For%20example%2C%20on%20FAT%20any,has%20been%20deleted%20or%20not. */
+
+            /* on FAT any deleted entry, file or folder are marked with ASCII symbol 229 (0xE5) that becomes the first symbol of the entry */
+
             if(fbyte == 0xe5){
-            	printf("\nName of 1st Deleted File: %c", fbyte);
+            	printf("\nName of 1st Deleted File (FAT): %c", fbyte);
               for(k; k <= 11; k++){
                 f_ten[k] = *(char*)(buf_part_table +(j * root_offset) + k);
                 printf("%c",f_ten[k]);
