@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
 /* 
 
     PHASE 2 
-    
+
     Write the full tool to display all the required features as stated above:
     a) Partition information,
     b) FAT Volume formation
@@ -334,7 +334,7 @@ int main(int argc, char *argv[]){
     return(0);
 }
 
-/* END */
+/* END of File */
 
 
 
