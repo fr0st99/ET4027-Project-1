@@ -8,6 +8,8 @@
 
 // https://tldp.org/HOWTO/Partition-Mass-Storage-Definitions-Naming-HOWTO/x190.html used for partition types with complete list. 
 
+// Phase 1 updated to add linux partition types as per Phase 1 feedback  
+
 
 #include <stdio.h>
 #include <string.h>
@@ -137,26 +139,24 @@ int main(int argc, char *argv[]){
         printf("\nThe root dir addr: %d \n ", rootDirAddr);
 
 
-      /* ################################################################## */
+/* ################################################################## */
 
-      /* 
-        Program requirements
-        You program will examine the NTFS file partition volume and report the following
-        information to the screen:
-        - How many bytes per sector for this NTFS volume
-        - How many sectors per cluster for this NTFS volume
-        - What is the sector address for the $MFT file record
-        - What is the type and length of the first attribute in the $MFT record
-        - What ids the type and length of the second attribute in the $MFT record
-      */
+/* NTFS Volume Information */
 
+/* 
+    Program requirements
+    You program will examine the NTFS file partition volume and report the following
+    information to the screen:
+    - How many bytes per sector for this NTFS volume
+    - How many sectors per cluster for this NTFS volume
+    - What is the sector address for the $MFT file record
+    - What is the type and length of the first attribute in the $MFT record
+     - What ids the type and length of the second attribute in the $MFT record
+*/
 
+/* ################################################################## */
 
-      /* ################################################################## */
-
-
-
-        
+     
         int ntfsSS, fsNTFS, frNTFS, bpsC, bpsB, MFTSect, fsMFT, frMFT;
         char MFTSectAddr[8];
         char buf_ntfs_table[64], buff_mtf_table[512] , buff_OTW_table[512];
@@ -204,10 +204,17 @@ int main(int argc, char *argv[]){
 
             printf("\nSector address for the $MFT file record: %d", NTFSinfo.SectorAddrMFT);
 
-            
-            //What is the type and length of the first two attributes in the $MFT record
 
-            //TYPE OF FIRST ATTRIB
+            /*     
+            - What is the sector address for the $MFT file record
+            - What is the type and length of the first attribute in the $MFT record
+
+             */
+
+            
+
+            /* Type of first attribute */
+
             fsMFT = fseek(fp, ((ntfsSS + NTFSinfo.SectorAddrMFT)*512), SEEK_SET); //Seek to the start of the part_entry list
             frMFT = fread(buff_OTW_table, 1, 512, fp); // Read the 512-byte block to memory buffer
             
@@ -219,7 +226,7 @@ int main(int argc, char *argv[]){
 
 
 
-              //Start of first attribute for MFT 
+            /* Start of first attribute for $MFT */
             char AttribType[4];
             AttribType[0] = *(unsigned char*)(buff_OTW_table + 0x00 + Attrib1);
             AttribType[1] = *(unsigned char*)(buff_OTW_table + 0x01 + Attrib1);
@@ -234,6 +241,7 @@ int main(int argc, char *argv[]){
             char typeName[50];
 
             switch (NTFSinfo.type1) {
+
                 default: strcpy (typeName, "Type not found!"); break;
                 case 16 : strcpy (typeName, "$Standard_Information"); break;
                 case 32 : strcpy (typeName, "$Attribute_List"); break;
