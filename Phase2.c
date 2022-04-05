@@ -6,6 +6,8 @@
 
 // Initial Program adapted from ADDENDUM 3 in project requirements inclusive of Phase 1 and Phase 2 work
 
+// https://tldp.org/HOWTO/Partition-Mass-Storage-Definitions-Naming-HOWTO/x190.html used for partition types with complete list. 
+
 
 #include <stdio.h>
 #include <string.h>
@@ -16,20 +18,15 @@ struct Partition{ int type; int start_sect; int size;} part_entry[4]; // 4 x par
 struct fatPartition{ int sect_per_cluster; int fat_area; int root_dir; int clust2Add; } fat_Info;
 
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
     if (argv[1] != NULL){
 
         // Define some variables
         int i, offset = 16, rootOffset = 32, not_exist = 0;
         FILE *fp;
         char buf_part_table[64], vol_type[12], buf_fat_part[512], buf_root_part[512], buf_del_part[512];
+        int *tmp_ptr, fs, fr, filesys_FAT, fileread_FAT, fsRoot, frRoot, fsDEL,frDEL, first_partition_Saddress, sizeSectA, sizeSectB, noFatCopies, maxDirectories, rootDirSize, rootDirAddr, sizeReservedArea, sectorAddr, sizeReservedArea2;
 
-        int *tmp_ptr, fs, fr, fsFAT, frFAT, fsRoot, frRoot, fsDEL,frDEL, firstPartADD, sizeSectA, sizeSectB, noFatCopies, maxDirectories, rootDirSize, rootDirAddr, sizeReservedArea, sectorAddr, sizeReservedArea2;
-        
-        
-        
-   
         fp = fopen(argv[1], "rb"); // Open file for reading - binary mode. Should use error check!
         fs = fseek(fp, 0x1BE, SEEK_SET); // Seek to the start of the part_entry list
         fr = fread(buf_part_table, 1, 64, fp); // Read the 64-byte block to memory buffer
@@ -51,15 +48,18 @@ int main(int argc, char *argv[])
                 case 0x0C : strcpy( vol_type, "FAT-32 (LBA)"); break;
                 case 0x0E : strcpy( vol_type, "FAT-16 (LBA)"); break;       
                 case 0x01 : strcpy ( vol_type, "FAT-12"); break;
-                case 0x02 : strcpy ( vol_type, "XENIX root"); break;
+                case 0x02 : strcpy ( vol_type, "XENIX root"); break;               
+                case 0x03 : strcpy ( vol_type, "XENIX usr"); break;            
                 case 0x05 : strcpy ( vol_type, "MS-DOS"); break;
                 case 0x06 : strcpy ( vol_type, "FAT-16"); break;
                 case 0x07 : strcpy ( vol_type, "NTFS"); break;
+                case 0x08 : strcpy ( vol_type, "AIX"); break;
+                case 0x09 : strcpy ( vol_type, "AIX Bootable"); break;
                 case 0x16 : strcpy ( vol_type, "Hidden FAT16"); break;
                 case 0x17 : strcpy (vol_type, "Hidden NTFS Partition"); break;
+                case 0x82 : strcpy ( vol_type, "Linux Swap"); break;
+                case 0x83 : strcpy ( vol_type, "Linux FS"); break;
                 case 0x1B : strcpy (vol_type, "Hidden FAT-32"); break;                          
-                case 0x42 : strcpy (vol_type, "Secure File System"); break;
-                case 0x82 : strcpy (vol_type, "Linux Swap partition"); break;
                 
                 default: strcpy ( vol_type, "NOT-DECODED"); break;
             }
@@ -74,22 +74,34 @@ int main(int argc, char *argv[])
 
 
       
-//Do Phase 2 here
-    //FAT Volume Information
-    //For the first partition only (Fat16 only) display:
-      //First partition SECTOR address, Jumps to offset of FAT 16
-			firstPartADD = part_entry[0].start_sect * 512;
-      
-      fsFAT = fseek(fp, firstPartADD, SEEK_SET); //Seek to the start of the part_entry list
-      
-      frFAT = fread(buf_fat_part, 1, 512, fp); // Read the 512-byte block to memory buffer
+/* 
+
+    PHASE 2 
+    
+    Write the full tool to display all the required features as stated above:
+    a) Partition information,
+    b) FAT Volume formation
+    c) NTFS Volume information (see Addendum-1)
+    
+*/
+
+/* ################################################################## */
+
+/* Fat Volume Information */
+
+			first_partition_Saddress = part_entry[0].start_sect * 512;
+      filesys_FAT = fseek(fp, first_partition_Saddress, SEEK_SET); //Seek to the start of the part_entry list
+      fileread_FAT = fread(buf_fat_part, 1, 512, fp); // Read the 512-byte block to memory buffer
 
       printf("\n");
-    //the number of sectors per cluster
+      
+      
+      //the number of sectors per cluster
       fat_Info.sect_per_cluster = *(char*)(buf_fat_part + 0xd ); // Char can store 512 thats why we use it
       printf("The sectors per cluster is: %-12d", fat_Info.sect_per_cluster);  //Printing the sectors per cluster
       
-    //the size of the FAT area,
+      
+      //the size of the FAT area,
       //Fat area size = (Size of FAT in sectors) * (Number of FAT copies)
       noFatCopies = *(char*)(buf_fat_part + 0x10);
       sizeSectA = *(unsigned char*)(buf_fat_part + 0x16);
@@ -99,8 +111,8 @@ int main(int argc, char *argv[])
       fat_Info.fat_area = sizeSectA * noFatCopies;
       printf("\nThe fat area is: %-12d", fat_Info.fat_area);  //Printing the Fat area
       
-                //the size of the root direcotry
-                    //Root dir size = ((Max no. of directories)*(dir entry size in bytes)/sector size
+        //the size of the root direcotry
+        //Root dir size = ((Max no. of directories)*(dir entry size in bytes)/sector size
         maxDirectories =  *(int*)(buf_fat_part + 0x11);
         rootDirSize = (maxDirectories * 32)/512;
         printf("\nThe root directory size: %d", rootDirSize);
@@ -122,72 +134,29 @@ int main(int argc, char *argv[])
         printf("\nThe sector address for #2 is: %d", sectorAddr);
 
 
-        //For the first deleted file on the volume's root directory display:
-        //Notes: 0XE5 code tells us that its a deleted file which is 229 decimal
         printf("\nThe root dir addr: %d \n ", rootDirAddr);
 
-        //Multiplied by 512 because that is how many directory entries per sector. (FAT16 info)
-        fsRoot = fseek(fp, rootDirAddr * 512 , SEEK_SET); //Seek to the start of the part_entry list
-        frRoot = fread(buf_root_part, 1, 512, fp); // Read the 512-byte block to memory buffer
+
+      /* ################################################################## */
+
+      /* 
+        Program requirements
+        You program will examine the NTFS file partition volume and report the following
+        information to the screen:
+        - How many bytes per sector for this NTFS volume
+        - How many sectors per cluster for this NTFS volume
+        - What is the sector address for the $MFT file record
+        - What is the type and length of the first attribute in the $MFT record
+        - What ids the type and length of the second attribute in the $MFT record
+      */
+
+
+
+      /* ################################################################## */
+
+
+
         
-        for(int j = 0; j < frRoot; j++){
-          	int firstByte = *(char*)(buf_part_table +(j * rootOffset));
-            int k = 1;
-            firstByte = firstByte & 0x000000ff;
-            char firstTEN[11];
-            firstTEN[0] = firstByte;
-
-            //the name of that file
-            if(firstByte == 0xe5){
-            	printf("\nThe name of the first deleted file is: %c", firstByte);
-              for(k; k <= 11; k++){
-                firstTEN[k] = *(char*)(buf_part_table +(j * rootOffset) + k);
-                printf("%c",firstTEN[k]);
-              }
-
-                //the size of that file
-                int sizeDelFile;
-                int sizeDelFileArr[4];
-                sizeDelFileArr[0] = *(unsigned char*)(buf_part_table +(j * rootOffset) + 0x1C);
-                sizeDelFileArr[1] = *(unsigned char*)(buf_part_table +(j * rootOffset) + 0x1D);
-                sizeDelFileArr[2] = *(unsigned char*)(buf_part_table +(j * rootOffset) + 0x1E);
-                sizeDelFileArr[3] = *(unsigned char*)(buf_part_table +(j * rootOffset) + 0x1F);
-                sizeDelFile = (sizeDelFileArr[3] << 24);
-                sizeDelFile = sizeDelFile + (sizeDelFileArr[2] << 16);
-                sizeDelFile = sizeDelFile + (sizeDelFileArr[1] << 8);
-                sizeDelFile = sizeDelFile + (sizeDelFileArr[0]);
-                printf("\nDeleted File Size in bytes: %-12d", sizeDelFile);
-                
-                
-                
-                //the number of the first cluster
-                int startingCluster;
-                int SCArr[2];
-                SCArr[0] = *(unsigned char*)(buf_part_table +(j * rootOffset) + 0x1A);
-                SCArr[1] = *(unsigned char*)(buf_part_table +(j * rootOffset) + 0x1B);
-                startingCluster = (SCArr[1] << 8);
-                startingCluster = startingCluster + SCArr[0];
-                printf("\nDeleted File Starting Cluster: %-12d", startingCluster);
-
-
-                //The first 16 characters of the content of that file (Assume simple text file)
-                int CSA = sectorAddr +  ((startingCluster - 2) * 8);
-                printf("\nCSA is: %-12d\n", CSA);
-
-                int fileRead = CSA * 512;
-                fsDEL = fseek(fp, fileRead, SEEK_SET); //Seek to the start of the part_entry list
-                frDEL = fread(buf_del_part, 1, 512, fp); // Read the 512-byte block to memory buffer
-                printf("The first 16 Characters are: ");
-                for (int w = 0; w <= 16; w++)
-                {
-                    printf("%c", buf_del_part[w]);
-                }
-                break;
-            }
-        }
-        printf("\n\n\n");
-
-        //NTFS Vars here
         int ntfsSS, fsNTFS, frNTFS, bpsC, bpsB, MFTSect, fsMFT, frMFT;
         char MFTSectAddr[8];
         char buf_ntfs_table[64], buff_mtf_table[512] , buff_OTW_table[512];
@@ -195,10 +164,10 @@ int main(int argc, char *argv[])
         struct NTFSpart{ int bytesPerSect; int SectorsPerClus; int SectorAddrMFT; int type1, type2, length1, length2; } NTFSinfo;
         //NTFS Volume Information
         for(int r = 0; r < 4; r++){
-          if(part_entry[r].type == 0x07){
+          if(part_entry[r].type == 0x07){ // checks for NTFS
             ntfsSS = part_entry[r].start_sect;
 						
-            printf("\nNTFS Starting Sector: %d", ntfsSS);
+            printf("\nStarting Sector (NTFS): %d", ntfsSS);
             fsNTFS = fseek(fp, (ntfsSS*512), SEEK_SET); //Seek to the start of the part_entry list
             frNTFS = fread(buf_ntfs_table, 1, 64, fp); // Read the 512-byte block to memory buffer
 
@@ -207,12 +176,12 @@ int main(int argc, char *argv[])
             bpsC = *(unsigned char*)(buf_ntfs_table + 0x0C);
             bpsC = (bpsC << 8);
             NTFSinfo.bytesPerSect = bpsC + bpsB;
-            printf("\nBytes Per Sector: %d",NTFSinfo.bytesPerSect);
+            printf("\nBytes per sector for this NTFS volume: %d",NTFSinfo.bytesPerSect);
 
 
           //How many sectors per cluster for this NTFS volume
             NTFSinfo.SectorsPerClus = *(unsigned char*)(buf_ntfs_table + 0x0D);
-            printf("\nSectors Per Cluster: %d",NTFSinfo.SectorsPerClus);
+            printf("\nSectors Per Cluster for this NTFS volume: %d",NTFSinfo.SectorsPerClus);
 
           //What is the sector address for the $MFT file record
             MFTSectAddr[0]= *(unsigned char*)(buf_ntfs_table + 0x30);
@@ -233,7 +202,7 @@ int main(int argc, char *argv[])
             MFTSect = MFTSect + (MFTSectAddr[0]);
             NTFSinfo.SectorAddrMFT = MFTSect * NTFSinfo.SectorsPerClus;
 
-            printf("\nSector Address for $MFT: %d", NTFSinfo.SectorAddrMFT);
+            printf("\nSector address for the $MFT file record: %d", NTFSinfo.SectorAddrMFT);
 
             
             //What is the type and length of the first two attributes in the $MFT record
@@ -245,6 +214,8 @@ int main(int argc, char *argv[])
             int Attrib1 = *(unsigned char*)(buff_OTW_table + 0x14);
             int Attrib1b = *(unsigned char*)(buff_OTW_table + 0x15);
             Attrib1 =  (Attrib1b << 8) + Attrib1; //GIVES US 56
+
+            printf("\n");
 
 
 
@@ -278,10 +249,11 @@ int main(int argc, char *argv[])
                 case 256 : strcpy (typeName, "Logged Utility Stream"); break;
                 default: strcpy (typeName, "Type not found!"); break;
             }
-            printf("\nAttribute 1 Type: %s",typeName);
+            printf("\nType of Attribute #1: %s",typeName);
 
 
-            //LENGTH OF FIRST ATTRIB
+            /* Length of first attribute */
+
             char AttribLen[4];
             AttribLen[0] = *(unsigned char*)(buff_OTW_table + 0x04 + Attrib1);
             AttribLen[1] = *(unsigned char*)(buff_OTW_table + 0x05 + Attrib1);
@@ -292,9 +264,12 @@ int main(int argc, char *argv[])
             NTFSinfo.length1 =NTFSinfo.length1 + (AttribLen[2] << 16);
             NTFSinfo.length1 =NTFSinfo.length1 + (AttribLen[1] << 8);
             NTFSinfo.length1 =NTFSinfo.length1 + AttribLen[0];
-            printf("\nAttribute 1 Length: %d", NTFSinfo.length1);
+            printf("\nLength of Attribute #1: %d", NTFSinfo.length1);
 
-            //Start of the Second Attribute
+            
+            
+            
+            /* Start of second attribute */
             int Attrib2 = Attrib1 +  NTFSinfo.length1;
 
             char Attrib2Type[4];
@@ -326,10 +301,11 @@ int main(int argc, char *argv[])
                 default: strcpy (typeName2, "Type not found!"); break;
             }
 
-            printf("\nAttribute 2 Type: %s", typeName2);
+            printf("\nType of Attribute #2: %s", typeName2);
 
 
-            //LENGTH OF FIRST ATTRIB
+            /* Length of second Attribute */
+
             char Attrib2Len[4];
             Attrib2Len[0] = *(unsigned char*)(buff_OTW_table + 0x04 + Attrib2);
             Attrib2Len[1] = *(unsigned char*)(buff_OTW_table + 0x05 + Attrib2);
@@ -341,18 +317,24 @@ int main(int argc, char *argv[])
             NTFSinfo.length2 =NTFSinfo.length2 + (Attrib2Len[1] << 8);
             NTFSinfo.length2 =NTFSinfo.length2 + Attrib2Len[0];
 
-            printf("\nAttribute 2 Length: %d", NTFSinfo.length2);
+            printf("\nLength of Attribute #2: %d", NTFSinfo.length2);
           }
         }
 
         fclose(fp);
 
     }else{
+
+        /* No image file passed to program */
         printf("Please pass an image file (.dd) when using this program\n");
     }
 
+    
+
     return(0);
 }
+
+/* END */
 
 
 
