@@ -24,10 +24,10 @@ int main(int argc, char *argv[]){
     if (argv[1] != NULL){
 
         // Define some variables
-        int i, offset = 16, rootOffset = 32, not_exist = 0;
+        int i, offset = 16, root_offset = 32, not_exist = 0;
         FILE *fp;
         char buf_part_table[64], vol_type[12], buf_fat_part[512], buf_root_part[512], buf_del_part[512];
-        int *tmp_ptr, fs, fr, filesys_FAT, fileread_FAT, fsRoot, frRoot, fsDEL,frDEL, first_partition_Saddress, sizeSectA, sizeSectB, noFatCopies, maxDirectories, rootDirSize, rootDirAddr, sizeReservedArea, sectorAddr, sizeReservedArea2;
+        int *tmp_ptr, fs, fr, fileseek_FAT, fileread_FAT, fileseek_root, fileread_root, fsDEL,frDEL, first_partition_Saddress, sizeSectA, sizeSectB, noFatCopies, maxDirectories, rootDirSize, rootDirAddr, sizeReservedArea, sectorAddr, sizeReservedArea2;
 
         fp = fopen(argv[1], "rb"); // Open file for reading - binary mode. Should use error check!
         fs = fseek(fp, 0x1BE, SEEK_SET); // Seek to the start of the part_entry list
@@ -92,8 +92,9 @@ int main(int argc, char *argv[]){
 /* Fat Volume Information */
 
 			first_partition_Saddress = part_entry[0].start_sect * 512;
-      filesys_FAT = fseek(fp, first_partition_Saddress, SEEK_SET); //Seek to the start of the part_entry list
+      fileseek_FAT = fseek(fp, first_partition_Saddress, SEEK_SET); //Seek to the start of the part_entry list
       fileread_FAT = fread(buf_fat_part, 1, 512, fp); // Read the 512-byte block to memory buffer
+      
 
       printf("\n");
       
@@ -137,6 +138,12 @@ int main(int argc, char *argv[]){
 
 
         printf("\nThe root dir addr: %d \n ", rootDirAddr);
+
+
+        
+
+
+
 
 
 /* ################################################################## */
@@ -327,6 +334,36 @@ int main(int argc, char *argv[]){
             NTFSinfo.length2 =NTFSinfo.length2 + Attrib2Len[0];
 
             printf("\nLength of Attribute #2: %d", NTFSinfo.length2);
+
+            printf("\n");
+
+
+            /* Deleted file details */
+
+            fileseek_root = fseek(fp, rootDirAddr * 512 , SEEK_SET); //Seek to the start of the part_entry list
+            fileread_root = fread(buf_root_part, 1, 512, fp); // Read the 512-byte block to memory buffer
+
+            for(int j = 0; j < fileread_root; j++){
+          	int fbyte = *(char*)(buf_part_table +(j * root_offset));
+            int k = 1;
+            fbyte = fbyte & 0x000000ff;
+            char f_ten[11];
+            f_ten[0] = fbyte;
+
+            //the name of that file
+            if(fbyte == 0xe5){
+            	printf("\nName of 1st Deleted File: %c", fbyte);
+              for(k; k <= 11; k++){
+                f_ten[k] = *(char*)(buf_part_table +(j * root_offset) + k);
+                printf("%c",f_ten[k]);
+              }             
+          }
+
+          
+        }
+
+        printf("\n");
+
           }
         }
 
