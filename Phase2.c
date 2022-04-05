@@ -234,20 +234,21 @@ int main(int argc, char *argv[]){
             char typeName[50];
 
             switch (NTFSinfo.type1) {
-                case 16 : strcpy (typeName, "Standard Information"); break;
-                case 32 : strcpy (typeName, "Attribute List"); break;
-                case 48 : strcpy (typeName, "File Name"); break;
-                case 64 : strcpy (typeName, "Object ID"); break;
-                case 80 : strcpy (typeName, "Security Descriptor"); break;
-                case 96 : strcpy (typeName, "Volume Name"); break;
-                case 122: strcpy (typeName,"Volume Info"); break;
-                case 128: strcpy (typeName, "Data"); break;
-                case 144: strcpy (typeName, "Index Root"); break;
-                case 160: strcpy (typeName, "Index Allocation"); break; //check this
-                case 176 : strcpy (typeName, "BitMap"); break;
-                case 192 : strcpy (typeName, "Reparse Point"); break;
-                case 256 : strcpy (typeName, "Logged Utility Stream"); break;
                 default: strcpy (typeName, "Type not found!"); break;
+                case 16 : strcpy (typeName, "$Standard_Information"); break;
+                case 32 : strcpy (typeName, "$Attribute_List"); break;
+                case 48 : strcpy (typeName, "$File_Name"); break;
+                case 64 : strcpy (typeName, "$Object_ID"); break;
+                case 80 : strcpy (typeName, "$Security_Descriptor"); break;
+                case 96 : strcpy (typeName, "$Volume_Name"); break;
+                case 122: strcpy (typeName,"$Volume_Info"); break;
+                case 128: strcpy (typeName, "$Data"); break;
+                case 144: strcpy (typeName, "$Index_Root"); break;
+                case 160: strcpy (typeName, "$Index_Allocation"); break; //check this
+                case 176 : strcpy (typeName, "$BitMap"); break;
+                case 192 : strcpy (typeName, "$Reparse_Point"); break;
+                case 256 : strcpy (typeName, "$Logged_Utility_Stream"); break;
+                
             }
             printf("\nType of Attribute #1: %s",typeName);
 
