@@ -97,6 +97,9 @@ int main(int argc, char *argv[]){
       
 
       printf("\n");
+      printf("Fat Volume Information:");
+      printf("\n");
+      printf("\n");
       
       
       //the number of sectors per cluster
@@ -139,6 +142,10 @@ int main(int argc, char *argv[]){
 
         printf("\nThe root dir addr: %d \n ", rootDirAddr);
 
+        printf("\n");
+        printf("\n##################################################################");
+        printf("\n");
+
 
         
 
@@ -162,6 +169,11 @@ int main(int argc, char *argv[]){
 */
 
 /* ################################################################## */
+
+      printf("\n");
+      printf("NTFS Volume Information:");
+      printf("\n");
+      printf("\n");
 
      
         int ntfsSS, fsNTFS, frNTFS, bpsC, bpsB, MFTSect, fsMFT, frMFT;
@@ -337,6 +349,11 @@ int main(int argc, char *argv[]){
 
             printf("\n");
 
+            printf("\n");
+            printf("\n##################################################################");
+            printf("\n");
+
+/* ################################################################## */
 
             /* Deleted file details (FAT) */
 
@@ -361,16 +378,22 @@ int main(int argc, char *argv[]){
               for(k; k <= 11; k++){
                 f_ten[k] = *(char*)(buf_part_table +(j * root_offset) + k);
                 printf("%c",f_ten[k]);
-              }             
+
+              }  
+
+                printf("\n");
+                printf("\n");
+                printf("\n##################################################################");
+                printf("\n");           
           }
 
           
         }
 
-        printf("\n");
 
-          }
-        }
+
+    }
+}
 
         fclose(fp);
 
@@ -386,7 +409,7 @@ int main(int argc, char *argv[]){
 }
 
 /* END of File */
-
+/* ################################################################## */
 
 
 
