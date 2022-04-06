@@ -301,12 +301,12 @@ int main(int argc, char *argv[])
 
         /* Type of first attribute */
 
-        fileseek_MFT = fseek(fp, ((NTFS_sectorSize + info_NTFS.s_addressMFT) * 512), SEEK_SET); 
-        fileread_MFT = fread(buff_offset_table, 1, 512, fp);                                    
+        fileseek_MFT = fseek(fp, ((NTFS_sectorSize + info_NTFS.s_addressMFT) * 512), SEEK_SET);
+        fileread_MFT = fread(buff_offset_table, 1, 512, fp);
 
         int attribute_1 = *(unsigned char *)(buff_offset_table + 0x14);
         int attribute_1_B = *(unsigned char *)(buff_offset_table + 0x15);
-        attribute_1 = (attribute_1_B << 8) + attribute_1; 
+        attribute_1 = (attribute_1_B << 8) + attribute_1;
 
         printf("\n");
 
@@ -321,8 +321,6 @@ int main(int argc, char *argv[])
         info_NTFS.attrib_1 = info_NTFS.attrib_1 + (attribute1_type[2] << 16);
         info_NTFS.attrib_1 = info_NTFS.attrib_1 + (attribute1_type[1] << 8);
         info_NTFS.attrib_1 = info_NTFS.attrib_1 + attribute1_type[0];
-
-        
 
         switch (info_NTFS.attrib_1)
         {
@@ -398,7 +396,6 @@ int main(int argc, char *argv[])
         info_NTFS.attrib_2 = info_NTFS.attrib_2 + (attribute2_type[1] << 8);
         info_NTFS.attrib_2 = info_NTFS.attrib_2 + attribute2_type[0];
 
-        
         switch (info_NTFS.attrib_2)
         {
         default:
@@ -443,7 +440,6 @@ int main(int argc, char *argv[])
         case 256:
           strcpy(type_attribute2, "$Logged Utility Stream");
           break;
-        
         }
 
         printf("\nType of Attribute #2: %s", type_attribute2);
