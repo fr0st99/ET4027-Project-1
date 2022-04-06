@@ -18,32 +18,29 @@
 
 struct Partition{ int type; int start_sect; int size;} part_entry[4]; // 4 x partition table entry
 struct fatPartition{ int sect_per_cluster; int fat_area; int root_dir; int clust2Add; } fat_Info;
-
-
 int main(int argc, char *argv[]){
-    if (argv[1] != NULL){
+if (argv[1] != NULL){
 
-        // Define some variables
-        int i, offset = 16, root_offset = 32, not_exist = 0;
-        FILE *fp;
-        char buf_part_table[64], vol_type[12], buf_fat_part[512], buf_root_part[512], buf_del_part[512];
-        int *tmp_ptr, fs, fr, fileseek_FAT, fileread_FAT, fileseek_root, fileread_root, fsDEL,frDEL, first_partition_Saddress, sizeSectA, sizeSectB, noFatCopies, maxDirectories, rootDirSize, rootDirAddr, sizeReservedArea, sectorAddr, sizeReservedArea2;
+// Define some variables
+int i, offset = 16, root_offset = 32, not_exist = 0;
+FILE *fp;
+char buf_part_table[64], vol_type[12], buf_fat_part[512], buf_root_part[512], buf_del_part[512];
+int *tmp_ptr, fs, fr, fileseek_FAT, fileread_FAT, fileseek_root, fileread_root, fsDEL,frDEL, first_partition_Saddress, sizeSectA, sizeSectB, noFatCopies, maxDirectories, rootDirSize, rootDirAddr, sizeReservedArea, sectorAddr, sizeReservedArea2;
 
-        fp = fopen(argv[1], "rb"); // Open file for reading - binary mode. Should use error check!
-        fs = fseek(fp, 0x1BE, SEEK_SET); // Seek to the start of the part_entry list
-        fr = fread(buf_part_table, 1, 64, fp); // Read the 64-byte block to memory buffer
+fp = fopen(argv[1], "rb"); // Open file for reading - binary mode. Should use error check!
+fs = fseek(fp, 0x1BE, SEEK_SET); // Seek to the start of the part_entry list
+fr = fread(buf_part_table, 1, 64, fp); // Read the 64-byte block to memory buffer
 
-        printf("############################## FORENSIC_TOOL_PHASE 1 #################################### \n");
-        printf("############################## Partitions on %s disk image ############################## \n", argv[1]);
+printf("############################## FORENSIC_TOOL_PHASE 1 #################################### \n");
+printf("############################## Partitions on %s disk image ############################## \n", argv[1]);
 
-
-        for (i=0; i <4; i++) {
-            part_entry[i].type = *(char*)(buf_part_table + 0x04 +(i * offset) );
-            if (part_entry[i].type == 0) not_exist++;
-            part_entry[i].start_sect = *(int*)(buf_part_table + 0x08 +(i * offset));
-            part_entry[i].size = *(int*)(buf_part_table + 0x0C + (i * offset)) ;
+for (i=0; i <4; i++) {
+    part_entry[i].type = *(char*)(buf_part_table + 0x04 +(i * offset) );
+    if (part_entry[i].type == 0) not_exist++;
+    part_entry[i].start_sect = *(int*)(buf_part_table + 0x08 +(i * offset));
+    part_entry[i].size = *(int*)(buf_part_table + 0x0C + (i * offset)) ;
             
-            switch (part_entry[i].type) {
+    switch (part_entry[i].type) {
 
                 case 00 : strcpy ( vol_type, "NOT-VALID"); break;
                 case 0x0B: strcpy ( vol_type,"FAT-32"); break;
@@ -64,14 +61,14 @@ int main(int argc, char *argv[]){
                 case 0x1B : strcpy (vol_type, "Hidden FAT-32"); break;                          
                 
                 default: strcpy ( vol_type, "NOT-DECODED"); break;
-            }
+  }
             
-            // Print out partition content
-            printf ("Partition %d: Type: %-12s Start: %-12d Size: %-12d\n", i, vol_type, part_entry[i].start_sect,
-            part_entry[i].size);
-            }
-            printf("\n\nThe total number of valid partitions is: %d\n\n", (4 - not_exist));
-            printf("################################################################## \n");
+// Print out partition content
+printf ("Partition %d: Type: %-12s Start: %-12d Size: %-12d\n", i, vol_type, part_entry[i].start_sect, part_entry[i].size);
+}
+
+printf("\n\nThe total number of valid partitions is: %d\n\n", (4 - not_exist));
+printf("################################################################## \n");
 
 
 
@@ -140,7 +137,7 @@ int main(int argc, char *argv[]){
         printf("\nSector address for Cluster #2: %d", sectorAddr);
 
 
-        printf("\nRoot directory address: %d \n ", rootDirAddr);
+        printf("\nRoot directory address is: %d \n ", rootDirAddr);
 
         printf("\n");
         printf("\n##################################################################");
