@@ -29,11 +29,17 @@ The total number of valid partitions is: 3
 FAT Volume Information:
 
 Sectors per cluster: 8
+
 FAT Area: 502
+
 Root directory size: 32
+
 Size of reserved area: 2
+
 Start sector: 63
+
 Sector address for Cluster #2: 599
+
 Root directory address is: 567
 
 
@@ -43,13 +49,19 @@ NTFS Volume Information:
 
 
 Starting Sector (NTFS): 1606500
+
 Bytes per sector for this NTFS volume: 512
+
 Sectors Per Cluster for this NTFS volume: 8
+
 Sector address for the $MFT file record: 32
 
 Type of Attribute #1: $Standard_Information
+
 Length of Attribute #1: 96
+
 Type of Attribute #2: $File Name
+
 Length of Attribute #2: 104
 
 
