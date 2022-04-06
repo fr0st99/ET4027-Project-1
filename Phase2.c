@@ -104,7 +104,7 @@ int main(int argc, char *argv[]){
       
       //the number of sectors per cluster
       fat_Info.sect_per_cluster = *(char*)(buf_fat_part + 0xd ); // Char can store 512 thats why we use it
-      printf("The sectors per cluster is: %-12d", fat_Info.sect_per_cluster);  //Printing the sectors per cluster
+      printf("Sectors per cluster: %-12d", fat_Info.sect_per_cluster);  //Printing the sectors per cluster
       
       
       //the size of the FAT area,
@@ -115,13 +115,13 @@ int main(int argc, char *argv[]){
       sizeSectB = (sizeSectB<<8) ;
       sizeSectA = sizeSectA + sizeSectB;      
       fat_Info.fat_area = sizeSectA * noFatCopies;
-      printf("\nThe fat area is: %-12d", fat_Info.fat_area);  //Printing the Fat area
+      printf("\nFAT Area: %-12d", fat_Info.fat_area);  //Printing the Fat area
       
         //the size of the root direcotry
         //Root dir size = ((Max no. of directories)*(dir entry size in bytes)/sector size
         maxDirectories =  *(int*)(buf_fat_part + 0x11);
         rootDirSize = (maxDirectories * 32)/512;
-        printf("\nThe root directory size: %d", rootDirSize);
+        printf("\nRoot directory size: %d", rootDirSize);
 
 
     //the sector address of Cluster #2,
@@ -133,14 +133,14 @@ int main(int argc, char *argv[]){
 
         sizeReservedArea2 = sizeReservedArea2<<8;
         sizeReservedArea = sizeReservedArea2 + sizeReservedArea;
-        printf("\nThe SIZE OF RESERVED AREA is: %-12d", sizeReservedArea);
-        printf("\nThe start sec is: %-12d", part_entry[0].start_sect);
+        printf("\nSize of reserved area: %-12d", sizeReservedArea);
+        printf("\nStart sector: %-12d", part_entry[0].start_sect);
         rootDirAddr = (part_entry[0].start_sect) + (sizeReservedArea) + fat_Info.fat_area;
         sectorAddr = rootDirAddr + rootDirSize;
-        printf("\nThe sector address for #2 is: %d", sectorAddr);
+        printf("\nSector address for Cluster #2: %d", sectorAddr);
 
 
-        printf("\nThe root dir addr: %d \n ", rootDirAddr);
+        printf("\nRoot directory address: %d \n ", rootDirAddr);
 
         printf("\n");
         printf("\n##################################################################");
