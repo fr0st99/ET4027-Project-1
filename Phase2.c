@@ -301,21 +301,21 @@ int main(int argc, char *argv[])
 
         /* Type of first attribute */
 
-        fileseek_MFT = fseek(fp, ((NTFS_sectorSize + info_NTFS.s_addressMFT) * 512), SEEK_SET); // Seek to the start of the part_entry list
-        fileread_MFT = fread(buff_offset_table, 1, 512, fp);                                    // Read the 512-byte block to memory buffer
+        fileseek_MFT = fseek(fp, ((NTFS_sectorSize + info_NTFS.s_addressMFT) * 512), SEEK_SET); 
+        fileread_MFT = fread(buff_offset_table, 1, 512, fp);                                    
 
-        int Attrib1 = *(unsigned char *)(buff_offset_table + 0x14);
-        int Attrib1b = *(unsigned char *)(buff_offset_table + 0x15);
-        Attrib1 = (Attrib1b << 8) + Attrib1; // GIVES US 56
+        int attribute_1 = *(unsigned char *)(buff_offset_table + 0x14);
+        int attribute_1_B = *(unsigned char *)(buff_offset_table + 0x15);
+        attribute_1 = (attribute_1_B << 8) + attribute_1; 
 
         printf("\n");
 
         /* Start of first attribute for $MFT */
 
-        attribute1_type[0] = *(unsigned char *)(buff_offset_table + 0x00 + Attrib1);
-        attribute1_type[1] = *(unsigned char *)(buff_offset_table + 0x01 + Attrib1);
-        attribute1_type[2] = *(unsigned char *)(buff_offset_table + 0x02 + Attrib1);
-        attribute1_type[3] = *(unsigned char *)(buff_offset_table + 0x03 + Attrib1);
+        attribute1_type[0] = *(unsigned char *)(buff_offset_table + 0x00 + attribute_1);
+        attribute1_type[1] = *(unsigned char *)(buff_offset_table + 0x01 + attribute_1);
+        attribute1_type[2] = *(unsigned char *)(buff_offset_table + 0x02 + attribute_1);
+        attribute1_type[3] = *(unsigned char *)(buff_offset_table + 0x03 + attribute_1);
 
         info_NTFS.attrib_1 = attribute1_type[3] << 24;
         info_NTFS.attrib_1 = info_NTFS.attrib_1 + (attribute1_type[2] << 16);
@@ -374,10 +374,10 @@ int main(int argc, char *argv[])
 
         /* Length of first attribute */
 
-        attribute1_length[0] = *(unsigned char *)(buff_offset_table + 0x04 + Attrib1);
-        attribute1_length[1] = *(unsigned char *)(buff_offset_table + 0x05 + Attrib1);
-        attribute1_length[2] = *(unsigned char *)(buff_offset_table + 0x06 + Attrib1);
-        attribute1_length[3] = *(unsigned char *)(buff_offset_table + 0x07 + Attrib1);
+        attribute1_length[0] = *(unsigned char *)(buff_offset_table + 0x04 + attribute_1);
+        attribute1_length[1] = *(unsigned char *)(buff_offset_table + 0x05 + attribute_1);
+        attribute1_length[2] = *(unsigned char *)(buff_offset_table + 0x06 + attribute_1);
+        attribute1_length[3] = *(unsigned char *)(buff_offset_table + 0x07 + attribute_1);
 
         info_NTFS.attrib_len_1 = attribute1_length[3] << 24;
         info_NTFS.attrib_len_1 = info_NTFS.attrib_len_1 + (attribute1_length[2] << 16);
@@ -386,12 +386,12 @@ int main(int argc, char *argv[])
         printf("\nLength of Attribute #1: %d", info_NTFS.attrib_len_1);
 
         /* Start of second attribute */
-        int Attrib2 = Attrib1 + info_NTFS.attrib_len_1;
+        int attribute_2 = attribute_1 + info_NTFS.attrib_len_1;
 
-        attribute2_type[0] = *(unsigned char *)(buff_offset_table + 0x00 + Attrib2);
-        attribute2_type[1] = *(unsigned char *)(buff_offset_table + 0x01 + Attrib2);
-        attribute2_type[2] = *(unsigned char *)(buff_offset_table + 0x02 + Attrib2);
-        attribute2_type[3] = *(unsigned char *)(buff_offset_table + 0x03 + Attrib2);
+        attribute2_type[0] = *(unsigned char *)(buff_offset_table + 0x00 + attribute_2);
+        attribute2_type[1] = *(unsigned char *)(buff_offset_table + 0x01 + attribute_2);
+        attribute2_type[2] = *(unsigned char *)(buff_offset_table + 0x02 + attribute_2);
+        attribute2_type[3] = *(unsigned char *)(buff_offset_table + 0x03 + attribute_2);
 
         info_NTFS.attrib_2 = attribute2_type[3] << 24;
         info_NTFS.attrib_2 = info_NTFS.attrib_2 + (attribute2_type[2] << 16);
@@ -450,10 +450,10 @@ int main(int argc, char *argv[])
 
         /* Length of second Attribute */
 
-        attribute2_length[0] = *(unsigned char *)(buff_offset_table + 0x04 + Attrib2);
-        attribute2_length[1] = *(unsigned char *)(buff_offset_table + 0x05 + Attrib2);
-        attribute2_length[2] = *(unsigned char *)(buff_offset_table + 0x06 + Attrib2);
-        attribute2_length[3] = *(unsigned char *)(buff_offset_table + 0x07 + Attrib2);
+        attribute2_length[0] = *(unsigned char *)(buff_offset_table + 0x04 + attribute_2);
+        attribute2_length[1] = *(unsigned char *)(buff_offset_table + 0x05 + attribute_2);
+        attribute2_length[2] = *(unsigned char *)(buff_offset_table + 0x06 + attribute_2);
+        attribute2_length[3] = *(unsigned char *)(buff_offset_table + 0x07 + attribute_2);
 
         info_NTFS.attrib_len_2 = attribute2_length[3] << 24;
         info_NTFS.attrib_len_2 = info_NTFS.attrib_len_2 + (attribute2_length[2] << 16);
