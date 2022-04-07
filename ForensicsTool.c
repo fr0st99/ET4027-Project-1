@@ -28,8 +28,9 @@ int main(int argc, char *argv[])
     // Define some variables
     int i, offset = 16, offset_root = 32, not_exist = 0;
     FILE *fp;
-    char buf_part_table[64], vol_type[12], buf_fat_part[512], buf_root_part[512];
+    char buf_part_table[64], buf_delete_part[512], vol_type[12], buf_fat_part[512], buf_root_part[512];
     int *tmp_ptr, fileseek_FAT, fileread_FAT, fileseek_root, fileread_root, first_partition_Saddress, sect_size_A, sect_size_B, null_FAT_CP, max_Dirs, root_dir_size, root_dir_address, reserved_area_size1, sector_Address, reserved_area_size2;
+    int fileseek_delete, fileread_delete;
     struct fatPartition
     {
       int sect_per_cluster;
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
     fileread_FAT = fread(buf_fat_part, 1, 512, fp);
 
     printf("\n");
-    printf("FAT Volume Information:");
+    printf("**********************FAT VOLUME INFORMATION**********************");
     printf("\n");
     printf("\n");
 
@@ -175,8 +176,6 @@ int main(int argc, char *argv[])
     root_dir_address = (part_entry[0].start_sect) + (reserved_area_size1) + fat_Info.fat_area;
     sector_Address = root_dir_address + root_dir_size;
     printf("\nSector address for Cluster #2: %d", sector_Address);
-    printf("\nRoot directory address is: %d \n ", root_dir_address);
-
     printf("\n");
     printf("\n##################################################################");
     printf("\n");
@@ -199,7 +198,7 @@ int main(int argc, char *argv[])
     /* ################################################################## */
 
     printf("\n");
-    printf("NTFS Volume Information:");
+    printf("**********************NTFS VOLUME INFORMATION**********************");
     printf("\n");
     printf("\n");
 
@@ -251,8 +250,6 @@ int main(int argc, char *argv[])
       {
 
         NTFS_sectorSize = part_entry[r].start_sect;
-        printf("\nStarting Sector (NTFS): %d", NTFS_sectorSize);
-
         fileseek_NTFS = fseek(fp, (NTFS_sectorSize * 512), SEEK_SET);
         fileread_NTFS = fread(buff_NTFS_table, 1, 64, fp);
 
@@ -468,43 +465,67 @@ int main(int argc, char *argv[])
 
         /* Deleted file details (FAT) */
 
+        /* 
+        
+           For the first deleted file on the volume’s root directory, display the name and size of
+           that file, and the number of the first cluster. Display the first 16 characters of the
+           content of that file (assume it is a simple text file). 
+           
+        */
+
+        printf("\n");
+        printf("**********************DELETED FILE DETAILS**********************");
+        printf("\n");
+        printf("\n");
+
+        int del_startCluster;
+        int clusterDelArray[2];
         fileseek_root = fseek(fp, root_dir_address * 512, SEEK_SET);
         fileread_root = fread(buf_root_part, 1, 512, fp);
-        int j;
-        int fbyte = *(char *)(buf_part_table + (j * offset_root));
-        int i = 1;
-        
-
-        if (fbyte == 0xe5)
-          { /* on FAT any deleted entry, file or folder are marked with ASCII symbol 229 (0xE5) that becomes the first symbol of the entry */
-            printf("\nName of 1st Deleted File (FAT): %c", fbyte);
 
         for (int j = 0; j < fileread_root; j++)
         {
-          
+          int fbyte = *(char *)(buf_part_table + (j * offset_root));
           fbyte = fbyte & 0x000000ff;
-          char f_ten[11];
-          f_ten[0] = fbyte;
+          char firstFT[15]; //first 16 
+          firstFT[0] = fbyte;
 
           /* Name of deleted file operation */
 
-          /* https://www.ntfs.com/disk-scan.htm#:~:text=For%20example%2C%20on%20FAT%20any,has%20been%20deleted%20or%20not. */
+          /* References https://www.ntfs.com/disk-scan.htm#:~:text=For%20example%2C%20on%20FAT%20any,has%20been%20deleted%20or%20not. */
 
-          
-          
-            for (i; i <= 11; i++)
+          if (fbyte == 0xe5)
+          { /* on FAT any deleted entry, file or folder are marked with ASCII symbol 229 (0xE5) that becomes the first symbol of the entry */
+            printf("\nName of 1st Deleted File (FAT): %c", fbyte);
+            for (i; i <= 15; i++)
             {
-              f_ten[i] = *(char *)(buf_part_table + (j * offset_root) + i);
-              printf("%c", f_ten[i]);
+              firstFT[i] = *(char *)(buf_part_table + (j * offset_root) + i);
+              printf("%c", firstFT[i]);
             }
+
+            /* Contents of deleted file */
+
+            clusterDelArray[0] = *(unsigned char *)(buf_part_table + (j * offset_root) + 0x1A);
+            clusterDelArray[1] = *(unsigned char *)(buf_part_table + (j * offset_root) + 0x1B);
+            del_startCluster = (clusterDelArray[1] << 8);
+            del_startCluster = del_startCluster + clusterDelArray[0];
+            int clusterStartAddress = sector_Address + ((del_startCluster - 2) * 8);
+            int del_fr = clusterStartAddress * 512;
+            fileseek_delete = fseek(fp, del_fr, SEEK_SET);
+            fileread_delete = fread(buf_delete_part, 1, 512, fp);
+            printf("\nContents of deleted file: ");
+            for (int tmp = 0; tmp <= 16; tmp++)
+            {
+              printf("%c", buf_delete_part[tmp]);
+            }
+
+            printf("\nStart cluster of 1st deleted file: %-12d", del_startCluster);
 
             printf("\n");
             printf("\n");
             printf("\n##################################################################");
             printf("\n");
           }
-        } else {
-          printf("\nNo deleted file for 1st file found ");
         }
       }
     }
