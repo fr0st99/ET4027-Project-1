@@ -470,11 +470,18 @@ int main(int argc, char *argv[])
 
         fileseek_root = fseek(fp, root_dir_address * 512, SEEK_SET);
         fileread_root = fread(buf_root_part, 1, 512, fp);
+        int j;
+        int fbyte = *(char *)(buf_part_table + (j * offset_root));
         int i = 1;
+        
+
+        if (fbyte == 0xe5)
+          { /* on FAT any deleted entry, file or folder are marked with ASCII symbol 229 (0xE5) that becomes the first symbol of the entry */
+            printf("\nName of 1st Deleted File (FAT): %c", fbyte);
 
         for (int j = 0; j < fileread_root; j++)
         {
-          int fbyte = *(char *)(buf_part_table + (j * offset_root));
+          
           fbyte = fbyte & 0x000000ff;
           char f_ten[11];
           f_ten[0] = fbyte;
@@ -483,9 +490,8 @@ int main(int argc, char *argv[])
 
           /* https://www.ntfs.com/disk-scan.htm#:~:text=For%20example%2C%20on%20FAT%20any,has%20been%20deleted%20or%20not. */
 
-          if (fbyte == 0xe5)
-          { /* on FAT any deleted entry, file or folder are marked with ASCII symbol 229 (0xE5) that becomes the first symbol of the entry */
-            printf("\nName of 1st Deleted File (FAT): %c", fbyte);
+          
+          
             for (i; i <= 11; i++)
             {
               f_ten[i] = *(char *)(buf_part_table + (j * offset_root) + i);
@@ -497,6 +503,8 @@ int main(int argc, char *argv[])
             printf("\n##################################################################");
             printf("\n");
           }
+        } else {
+          printf("\nNo deleted file for 1st file found ");
         }
       }
     }
