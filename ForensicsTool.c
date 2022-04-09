@@ -20,23 +20,49 @@ struct Partition
   int start_sect;
   int size;
 } part_entry[4]; // 4 x partition table entry
+
 int main(int argc, char *argv[])
 {
-  if (argv[1] != NULL)
+  if (argv[1] != 0)
   { /* Check if file is present or not */
 
     // Define some variables
-    int i, offset = 16, offset_root = 32, not_exist = 0;
+    int i;
+    int offset = 16;
+    int root_offset = 32;
+    int not_exist = 0;
+    int fileseek_delete;
+    int fileread_delete;
+    int *tmp_ptr;
+    
+    int fileseek_FAT;
+    int fileread_FAT;
+    int fileseek_root;
+    int fileread_root;
+    int first_partition_Saddress;
+    
+    int sect_size_A;
+    int sect_size_B;
+    int null_FAT_CP;
+    int max_Dirs; 
+    
+    int root_dir_size;
+    int root_dir_address; 
+    int reserved_area_size1;
+    int sector_Address;
+    int reserved_area_size2;
+
     FILE *fp;
-    char buf_part_table[64], buf_delete_part[512], vol_type[12], buf_fat_part[512], buf_root_part[512];
-    int *tmp_ptr, fileseek_FAT, fileread_FAT, fileseek_root, fileread_root, first_partition_Saddress, sect_size_A, sect_size_B, null_FAT_CP, max_Dirs, root_dir_size, root_dir_address, reserved_area_size1, sector_Address, reserved_area_size2;
-    int fileseek_delete, fileread_delete;
-    struct fatPartition
+    char vol_type[12], buf_part_table[64], buf_delete_part[512], buf_root_part[512], buf_FAT_part[512];
+    
+
+    struct fat_partition
     {
-      int sect_per_cluster;
       int fat_area;
+      int sect_per_cluster;  
       int root_dir;
     } fat_Info;
+
     fp = fopen(argv[1], "rb");        // Open file for reading - binary mode. Should use error check!
     fseek(fp, 0x1BE, SEEK_SET);       // Seek to the start of the part_entry list
     fread(buf_part_table, 1, 64, fp); // Read the 64-byte block to memory buffer
@@ -138,24 +164,24 @@ int main(int argc, char *argv[])
 
     first_partition_Saddress = part_entry[0].start_sect * 512;
     fileseek_FAT = fseek(fp, first_partition_Saddress, SEEK_SET); // Seek to the start of the part_entry list
-    fileread_FAT = fread(buf_fat_part, 1, 512, fp);
+    fileread_FAT = fread(buf_FAT_part, 1, 512, fp);
 
     printf("\n");
     printf("**********************FAT VOLUME INFORMATION**********************");
     printf("\n");
     printf("\n");
 
-    fat_Info.sect_per_cluster = *(char *)(buf_fat_part + 0xd);
+    fat_Info.sect_per_cluster = *(char *)(buf_FAT_part + 0xd);
     printf("Sectors per cluster: %-12d", fat_Info.sect_per_cluster);
 
-    null_FAT_CP = *(char *)(buf_fat_part + 0x10);
-    sect_size_A = *(unsigned char *)(buf_fat_part + 0x16);
-    sect_size_B = *(char *)(buf_fat_part + 0x17);
+    null_FAT_CP = *(char *)(buf_FAT_part + 0x10);
+    sect_size_A = *(unsigned char *)(buf_FAT_part + 0x16);
+    sect_size_B = *(char *)(buf_FAT_part + 0x17);
     sect_size_B = (sect_size_B << 8);
     sect_size_A = sect_size_A + sect_size_B;
     fat_Info.fat_area = sect_size_A * null_FAT_CP;
     printf("\nFAT Area: %-12d", fat_Info.fat_area);
-    max_Dirs = *(int *)(buf_fat_part + 0x11);
+    max_Dirs = *(int *)(buf_FAT_part + 0x11);
     root_dir_size = (max_Dirs * 32) / 512;
     printf("\nRoot directory size: %d", root_dir_size);
 
@@ -167,8 +193,8 @@ int main(int argc, char *argv[])
 
      */
 
-    reserved_area_size1 = (*(char *)(buf_fat_part + 0x0E));
-    reserved_area_size2 = (*(char *)(buf_fat_part + 0x0F));
+    reserved_area_size1 = (*(char *)(buf_FAT_part + 0x0E));
+    reserved_area_size2 = (*(char *)(buf_FAT_part + 0x0F));
     reserved_area_size2 = reserved_area_size2 << 8;
     reserved_area_size1 = reserved_area_size2 + reserved_area_size1;
     printf("\nSize of reserved area: %-12d", reserved_area_size1);
@@ -465,12 +491,12 @@ int main(int argc, char *argv[])
 
         /* Deleted file details (FAT) */
 
-        /* 
-        
+        /*
+
            For the first deleted file on the volume’s root directory, display the name and size of
            that file, and the number of the first cluster. Display the first 16 characters of the
-           content of that file (assume it is a simple text file). 
-           
+           content of that file (assume it is a simple text file).
+
         */
 
         printf("\n");
@@ -485,9 +511,9 @@ int main(int argc, char *argv[])
 
         for (int j = 0; j < fileread_root; j++)
         {
-          int fbyte = *(char *)(buf_part_table + (j * offset_root));
+          int fbyte = *(char *)(buf_part_table + (j * root_offset));
           fbyte = fbyte & 0x000000ff;
-          char firstFT[15]; //first 16 
+          char firstFT[15]; // first 16
           firstFT[0] = fbyte;
 
           /* Name of deleted file operation */
@@ -499,14 +525,14 @@ int main(int argc, char *argv[])
             printf("\nName of 1st Deleted File (FAT): %c", fbyte);
             for (i; i <= 15; i++)
             {
-              firstFT[i] = *(char *)(buf_part_table + (j * offset_root) + i);
+              firstFT[i] = *(char *)(buf_part_table + (j * root_offset) + i);
               printf("%c", firstFT[i]);
             }
 
             /* Contents of deleted file */
 
-            clusterDelArray[0] = *(unsigned char *)(buf_part_table + (j * offset_root) + 0x1A);
-            clusterDelArray[1] = *(unsigned char *)(buf_part_table + (j * offset_root) + 0x1B);
+            clusterDelArray[0] = *(unsigned char *)(buf_part_table + (j * root_offset) + 0x1A);
+            clusterDelArray[1] = *(unsigned char *)(buf_part_table + (j * root_offset) + 0x1B);
             del_startCluster = (clusterDelArray[1] << 8);
             del_startCluster = del_startCluster + clusterDelArray[0];
             int clusterStartAddress = sector_Address + ((del_startCluster - 2) * 8);
@@ -535,7 +561,7 @@ int main(int argc, char *argv[])
   else
   {
     /* No image file passed to program */
-    printf("Please pass an image file (.dd) when using this program\n");
+    printf("\nPlease pass an image file (.dd) when using this program e.g: .ForensicsTool.exe 'PATH OF FILE'");
   }
 
   return (0);
