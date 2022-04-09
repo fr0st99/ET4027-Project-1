@@ -4,29 +4,32 @@ In order to run the application install a GCC compiler first
 
 Then run the following commands: 
 
-**gcc .\Phase2.c -o ForensicsProgram**
+**gcc .\ForensicsTool.c -o ForensicsTool**
 
-**.\ForensicsProgram.exe 'PATH OF FILE'** 
+**.\ForensicsTool.exe 'PATH OF FILE'** 
 
-e.g .\ForensicsProgram.exe 'C:\Users\Big Chungus\Downloads\Sample_1.dd'
+e.g .\ForensicsTool.exe 'C:\Users\Big Chungus\Downloads\Sample_1.dd'
 
 
 Running the last line will display the following information: 
 
-############################## FORENSIC_TOOL_COMPLETE #################################### 
-############################## Partitions on C:\Users\Big Chungus\Downloads\Sample_1.dd disk image ############################## 
+############################## FORENSIC_TOOL_COMPLETE ####################################
+############################## Partitions on C:\Users\Big Chungus\Downloads\Sample_1.dd disk image ##############################
 
-Partition 0: Type: FAT-16       Start: 63           Size: 514017      
-Partition 1: Type: FAT-32       Start: 578340       Size: 1028160     
-Partition 2: Type: NTFS         Start: 1606500      Size: 369495      
+Partition 0: Type: FAT-16       Start: 63           Size: 514017
+
+Partition 1: Type: FAT-32       Start: 578340       Size: 1028160
+
+Partition 2: Type: NTFS         Start: 1606500      Size: 369495
+
 Partition 3: Type: NOT-VALID    Start: 0            Size: 0
 
 
 The total number of valid partitions is: 3
 
-################################################################## 
+##################################################################
 
-FAT Volume Information:
+**********************FAT VOLUME INFORMATION**********************
 
 Sectors per cluster: 8
 
@@ -40,15 +43,10 @@ Start sector: 63
 
 Sector address for Cluster #2: 599
 
-Root directory address is: 567
-
-
 ##################################################################
 
-NTFS Volume Information:
+**********************NTFS VOLUME INFORMATION**********************
 
-
-Starting Sector (NTFS): 1606500
 
 Bytes per sector for this NTFS volume: 512
 
@@ -67,7 +65,16 @@ Length of Attribute #2: 104
 
 ##################################################################
 
-Name of 1st Deleted File (FAT): σOOK    TXT
+**********************DELETED FILE DETAILS**********************
+
+
+Name of 1st Deleted File (FAT): σ    TXT ↑▓.ü
+
+Contents of deleted file:
+
+Section A:  P
+
+Start cluster of 1st deleted file: 19
 
 
 ##################################################################
