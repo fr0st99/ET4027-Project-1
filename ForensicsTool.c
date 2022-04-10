@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     
     int sect_size_A;
     int sect_size_B;
-    int null_FAT_CP;
+    int FATallocTables;
     int max_Dirs; 
     
     int root_dir_size;
@@ -174,12 +174,12 @@ int main(int argc, char *argv[])
     fat_Info.sect_per_cluster = *(char *)(buf_FAT_part + 0xd);
     printf("Sectors per cluster: %-12d", fat_Info.sect_per_cluster);
 
-    null_FAT_CP = *(char *)(buf_FAT_part + 0x10);
+    FATallocTables = *(char *)(buf_FAT_part + 0x10);
     sect_size_A = *(unsigned char *)(buf_FAT_part + 0x16);
     sect_size_B = *(char *)(buf_FAT_part + 0x17);
     sect_size_B = (sect_size_B << 8);
     sect_size_A = sect_size_A + sect_size_B;
-    fat_Info.fat_area = sect_size_A * null_FAT_CP;
+    fat_Info.fat_area = sect_size_A * FATallocTables;
     printf("\nFAT Area: %-12d", fat_Info.fat_area);
     max_Dirs = *(int *)(buf_FAT_part + 0x11);
     root_dir_size = (max_Dirs * 32) / 512;
