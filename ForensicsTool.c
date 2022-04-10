@@ -540,12 +540,19 @@ int main(int argc, char *argv[])
             fileseek_delete = fseek(fp, del_fr, SEEK_SET);
             fileread_delete = fread(buf_delete_part, 1, 512, fp);
             printf("\nContents of deleted file: ");
+            for (int tmp = 0; tmp <= 1024; tmp++)
+            {
+              printf("%c", buf_delete_part[tmp]);
+            }
+            printf("\n");
+            printf("\nStart cluster of 1st deleted file: %-12d", del_startCluster);
+            printf("\n");
+
+            printf("\nContents of deleted file (first 16 chars): ");
             for (int tmp = 0; tmp <= 16; tmp++)
             {
               printf("%c", buf_delete_part[tmp]);
             }
-
-            printf("\nStart cluster of 1st deleted file: %-12d", del_startCluster);
 
             printf("\n");
             printf("\n");
