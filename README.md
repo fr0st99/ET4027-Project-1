@@ -1,6 +1,6 @@
 # ET4027-Project-1
 
-This project achieve 17.8/20 in Academic Year 2022
+This project achieved 17.8/20 in Academic Year 2022
 
 In order to run the application install a GCC compiler first
 
